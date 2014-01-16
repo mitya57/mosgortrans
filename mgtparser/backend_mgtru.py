@@ -46,17 +46,17 @@ class MgtRuBackend(Backend):
 		soup = BeautifulSoup(message)
 		table = soup.find('table', 'tblroute')
 		links = table.find_all('a')
-		self.routes = dict((link.string, _fix_url(link['href'])) for link in links)
+		self.routes = [(link.string, _fix_url(link['href'])) for link in links]
 
 	def _get_route_url(self, route_type, route):
 		pattern = _get_url_pattern(route_type)
-		for r in self.routes:
-			if r == route and pattern in self.routes[r]:
-				return self.routes[r]
+		for r, url in self.routes:
+			if r == route and pattern in url:
+				return url
 
 	def get_routes_by_type(self, route_type):
 		pattern = _get_url_pattern(route_type)
-		return [r for r in self.routes if pattern in self.routes[r]]
+		return [r for r, url in self.routes if pattern in url]
 
 	def get_route_info(self, route_type, route):
 		url = self._get_route_url(route_type, route)
