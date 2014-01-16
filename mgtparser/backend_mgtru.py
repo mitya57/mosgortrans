@@ -62,6 +62,8 @@ class MgtRuBackend(Backend):
 		url = self._get_route_url(route_type, route)
 		request = urlopen(url)
 		message = request.read().decode('utf-8')
+		# Fix syntax error
+		message = message.replace('</th><tr>', '</th></tr>')
 		soup = BeautifulSoup(message)
 		table = soup.table
 		trs = table.find_all('tr')[1:]
