@@ -16,10 +16,10 @@ def _parse_days(days_str):
 		return '1111100'
 	if days_str == 'ВЫХОДНЫЕ':
 		return '0000011'
-	if days_str == 'СБ':
-		return '0000010'
-	if days_str == 'ВС':
-		return '0000001'
+	if days_str == 'БУДНИ, ВЫХОДНЫЕ':
+		return '1111111'
+	weekdays = 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'
+	return ''.join([str(int(wd in days_str)) for wd in weekdays])
 
 def _parse_date(date_str):
 	if not date_str:
