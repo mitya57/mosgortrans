@@ -4,12 +4,10 @@
 
 from urllib.request import urlopen
 from urllib.parse import urlencode
-from functools import wraps
 from bs4 import BeautifulSoup
 from datetime import date
 
 from .backend import Backend, Schedule
-from .common import RouteType, find_day
 
 base_url = 'http://mosgortrans.org/pass3/request.ajax.php?'
 schedule_base_url = 'http://mosgortrans.org/pass3/shedule.php?'
@@ -24,6 +22,12 @@ def _parse_date(date_str):
 	month = months.index(month)
 	return date(int(year), month, int(day))
 
+def _find_day(day, days):
+	for week in days:
+		if week[day] == '1':
+			return week
+	raise AttributeError('No route for this day found.')
+
 class MgtOrgBackend(Backend):
 	'''The mosgortrans.org backend.'''
 
@@ -35,7 +39,7 @@ class MgtOrgBackend(Backend):
 			d['way'] = route
 		if day is not None:
 			if isinstance(day, int):
-				day = find_day(day, self.get_days(route_type, route))
+				day = _find_day(day, self.get_days(route_type, route))
 			d['date'] = day
 		if direction:
 			d['direction'] = direction

@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from datetime import date
 
 from .backend import Backend, Schedule
-from .common import RouteType, find_day
+from .common import RouteType
 
 base_url = 'http://www.mosgortrans.ru/rasp/'
 
@@ -78,7 +78,7 @@ class MgtRuBackend(Backend):
 
 	def get_days(self, route_type, route):
 		route_info = self.get_route_info(route_type, route)
-		return [days_info[0] for date_info in route_info]
+		return [date_info[0] for date_info in route_info]
 
 	def get_waypoints_page(self, url):
 		request = urlopen(url)
@@ -104,7 +104,7 @@ class MgtRuBackend(Backend):
 			isinstance(day, int) and date_info[0][day] == '1'):
 				url = date_info[3]
 		waypoints_page = self.get_waypoints_page(url)
-		return [name for name, links in waypoins_page]
+		return [name for name, links in waypoints_page]
 
 	def get_waypoints(self, route_type, route, day, direction):
 		route_info = self.get_route_info(route_type, route)
@@ -116,8 +116,7 @@ class MgtRuBackend(Backend):
 		direction = waypoints_page[direction == 'BA'][1]
 		return [waypoint for waypoint, url in direction]
 
-	def get_schedule(self, route_type, route, day, direction, waypoint):
-		route_info = self.get_route_info(route_type, route)
+	def get_schedule_from_route_info(self, route_info, day, direction, waypoint):
 		schedule = Schedule()
 		for date_info in route_info:
 			if date_info[0] == day or (
@@ -145,3 +144,7 @@ class MgtRuBackend(Backend):
 				for minute in minutes if minute != '\xa0']
 		schedule.schedule = {waypoint_name: result}
 		return schedule
+
+	def get_schedule(self, route_type, route, day, direction, waypoint):
+		route_info = self.get_route_info(route_type, route)
+		return self.get_schedule_from_route_info(route_info, day, direction, waypoint)

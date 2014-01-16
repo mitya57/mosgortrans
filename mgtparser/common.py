@@ -11,9 +11,3 @@ class RouteType(Enum):
 	Auto = 'avto'
 	Trol = 'trol'
 	Tram = 'tram'
-
-def find_day(day, days):
-	for week in days:
-		if week[day] == '1':
-			return week
-	raise AttributeError('No route for this day found.')
