@@ -19,7 +19,7 @@ def _parse_date(date_str):
 	if len(date_str) <= 1:
 		return None
 	day, month, year = date_str.split()
-	month = months.index(month)
+	month = months.index(month) + 1
 	return date(int(year), month, int(day))
 
 def _find_day(day, days):
