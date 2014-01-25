@@ -3,6 +3,7 @@
 # License: BSD
 
 import abc
+import json
 
 class Backend(metaclass=abc.ABCMeta):
 	'''This is an abstract type from which all other backends should
@@ -87,3 +88,34 @@ class Schedule():
 	created = None
 	valid = None
 	schedule = None
+
+	def _get_dumpable_object(self):
+		waypoints = {}
+		for waypoint_name in self.schedule:
+			waypoints[waypoint_name] = {}
+			for time in self.schedule[waypoint_name]:
+				hour, minute = time.split(':')
+				if hour in waypoints[waypoint_name]:
+					waypoints[waypoint_name][hour] += (',' + minute)
+				else:
+					waypoints[waypoint_name][hour] = minute
+		return {
+			'created': str(self.created) if self.created else None,
+			'valid': str(self.valid) if self.valid else None,
+			'waypoints': waypoints
+		}
+
+	def dump_json(self):
+		'''Returns a JSON string representing the schedule.'''
+		return json.dumps(self._get_dumpable_object(), sort_keys=True, indent=2,
+			ensure_ascii=False, separators=(',', ': '))
+
+	def save_to_file(self, filename):
+		'''Saves the schedule to a JSON file.
+
+		:param filename: file name
+		:type filename: string
+		'''
+		with open(filename, 'w') as output:
+			json.dump(self._get_dumpable_object(), output, sort_keys=True,
+			indent=2, ensure_ascii=False, separators=(',', ': '))
