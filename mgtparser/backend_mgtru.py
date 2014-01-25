@@ -139,15 +139,10 @@ class MgtRuBackend(Backend):
 			result = []
 			for pair in subtds:
 				hour = pair[0].string
-				minutes = []
-				children = list(pair[1].children)
-				minutes.append(children[0])
-				while len(children) > 1:
-					children = list(children[1].children)
-					minutes.append(children[0])
+				minutes = list(pair[1].children)[0::2]
 				result += ['%s:%s' % (hour, minute)
 					for minute in minutes if minute != '\xa0']
-			schedule[waypoint_name] = result
+			schedule.schedule[waypoint_name] = result
 		return schedule
 
 	def get_schedule(self, route_type, route, day, direction, waypoint):
