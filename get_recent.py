@@ -1,9 +1,9 @@
 #!/usr/bin/python3
-# Author: 2013 Dmitry Shachnev <d-shachnev@yandex.ru>
+# Author: 2014 Dmitry Shachnev <d-shachnev@yandex.ru>
 
 from mgtparser.backend_mgtorg import MgtOrgBackend
 from mgtparser.backend_mgtru import MgtRuBackend
-from mgtparser.common import RouteType
+from mgtparser.common import RouteType, get_routes_list
 from argparse import ArgumentParser
 from datetime import datetime
 from functools import wraps
@@ -29,15 +29,7 @@ if args.org:
 
 routes_list = None
 if args.input_file:
-	routes_list = []
-	input_file = open(args.input_file)
-	for line in input_file:
-		if ' ' in line:
-			rtype, route = line.split()
-			routes_list.append((RouteType(rtype), route))
-		else:
-			routes_list.append((RouteType.Auto, line.rstrip()))
-	input_file.close()
+	routes_list = list(get_routes_list(args.input_file))
 
 result = []
 now = datetime.now().date()

@@ -11,3 +11,18 @@ class RouteType(Enum):
 	Auto = 'avto'
 	Trol = 'trol'
 	Tram = 'tram'
+
+def get_routes_list(filename):
+	'''Reads the routes list from the given file.
+
+	:param filename: file name
+	:type filename: string
+	:rtype: generator of (:class:`RouteType`, string) tuples
+	'''
+	with open(filename) as input_file:
+		for line in input_file:
+			if ' ' in line:
+				rtype, route = line.split()
+				yield (RouteType(rtype), route)
+			else:
+				yield (RouteType.Auto, line.rstrip())
