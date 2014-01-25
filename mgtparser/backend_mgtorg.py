@@ -68,9 +68,10 @@ class MgtOrgBackend(Backend):
 		# Direction must be 'AB' or 'BA'
 		return self._load_list_url('waypoints', route_type, route, day, direction)
 
-	def get_schedule(self, route_type, route, day, direction, waypoint='all'):
-		# Direction must be 'AB' or 'BA', waypoint should be an int
+	def get_schedule(self, route_type, route, day, direction, waypoint):
 		schedule = Schedule()
+		if waypoint is None:
+			waypoint = 'all'
 		url = self._build_url(None, route_type, route, day, direction, waypoint)
 		request = urlopen(url)
 		message = request.read().decode('cp1251')

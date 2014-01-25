@@ -66,12 +66,12 @@ class Backend(metaclass=abc.ABCMeta):
 		:param route: route number
 		:param day: day of week
 		:param direction: direction number
-		:param waypoint: waypoint number
+		:param waypoint: waypoint number (if None, get schedule for all waypoints)
 		:type route_type: :class:`~common.RouteType`
 		:type route: string
 		:type day: either week string or an integer in ``range(7)``
 		:type direction: string, 'AB' or 'BA'
-		:type waypoint: integer
+		:type waypoint: integer or None
 		:rtype: :class:`Schedule`
 		'''
 
