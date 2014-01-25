@@ -126,25 +126,28 @@ class MgtRuBackend(Backend):
 				schedule.created, schedule.valid, url = date_info[1:]
 		waypoints_page = self.get_waypoints_page(url)
 		direction = waypoints_page[direction == 'BA'][1]
-		waypoint_name, url = direction[waypoint]
-		request = urlopen(url)
-		message = request.read().decode('utf-8')
-		soup = BeautifulSoup(message)
-		table = soup.table
-		subtds = table.find_all('td')
-		subtds = zip(subtds[0::2], subtds[1::2])
-		result = []
-		for pair in subtds:
-			hour = pair[0].string
-			minutes = []
-			children = list(pair[1].children)
-			minutes.append(children[0])
-			while len(children) > 1:
-				children = list(children[1].children)
+		if waypoint is not None:
+			direction = (direction[waypoint],)
+		schedule.schedule = {}
+		for waypoint_name, url in direction:
+			request = urlopen(url)
+			message = request.read().decode('utf-8')
+			soup = BeautifulSoup(message)
+			table = soup.table
+			subtds = table.find_all('td')
+			subtds = zip(subtds[0::2], subtds[1::2])
+			result = []
+			for pair in subtds:
+				hour = pair[0].string
+				minutes = []
+				children = list(pair[1].children)
 				minutes.append(children[0])
-			result += ['%s:%s' % (hour, minute)
-				for minute in minutes if minute != '\xa0']
-		schedule.schedule = {waypoint_name: result}
+				while len(children) > 1:
+					children = list(children[1].children)
+					minutes.append(children[0])
+				result += ['%s:%s' % (hour, minute)
+					for minute in minutes if minute != '\xa0']
+			schedule[waypoint_name] = result
 		return schedule
 
 	def get_schedule(self, route_type, route, day, direction, waypoint):
