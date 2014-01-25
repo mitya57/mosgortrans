@@ -62,7 +62,10 @@ class MgtOrgBackend(Backend):
 		return self._load_list_url('days', route_type, route)
 
 	def get_directions(self, route_type, route, day):
-		return self._load_list_url('directions', route_type, route, day)
+		list = self._load_list_url('directions', route_type, route, day)
+		if ' -' in list:
+			list.remove(' -')
+		return list
 
 	def get_waypoints(self, route_type, route, day, direction):
 		# Direction must be 'AB' or 'BA'
