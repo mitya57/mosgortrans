@@ -15,6 +15,7 @@ parser.add_argument('-i', '--input-file', help='file to read routes list from')
 parser.add_argument('-d', '--days', type=int, help='number of recent days for which schedules should be checked', default=14)
 parser.add_argument('-D', '--download', help='download the schedules as JSON files', action='store_true')
 parser.add_argument('-O', '--output-dir', help='directory to store downloaded schedules in', default='schedules')
+parser.add_argument('-g', '--debug', help='enable debug output', action='store_true')
 parser.add_argument('--ru', help='only search mosgortrans.ru site', action='store_true')
 parser.add_argument('--org', help='only search mosgortrans.org site', action='store_true')
 args = parser.parse_args()
@@ -29,6 +30,12 @@ if args.ru:
 	all_mgtorg_routes = []
 if args.org:
 	all_mgtru_routes = []
+
+if args.debug:
+	all_mgtorg_routes = list(all_mgtorg_routes)
+	all_mgtru_routes = list(all_mgtru_routes)
+	print('All MgtOrgBackend routes: %r' % all_mgtorg_routes)
+	print('All MgtRuBackend routes: %r' % all_mgtru_routes)
 
 routes_list = None
 if args.input_file:
@@ -82,6 +89,8 @@ def process_org(route_type, route):
 @retrying_wrapper
 def process_ru(route_type, route):
 	route_info = backend_ru.get_route_info(route_type, route)
+	if args.debug:
+		print('got route_info for', route_type.name, route)
 	for date_info in route_info:
 		if args.download and check_timestamp(date_info[1]):
 			directions = len(backend_ru.get_directions(route_type,
