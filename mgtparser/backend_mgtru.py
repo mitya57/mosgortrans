@@ -43,6 +43,8 @@ class MgtRuBackend(Backend):
 	def __init__(self):
 		request = urlopen(base_url)
 		message = request.read().decode('utf-8')
+		# Fix syntax errors
+		message = message.replace('</td></tr><td>', '</td></tr><tr><td>')
 		soup = BeautifulSoup(message)
 		table = soup.find('table', 'tblroute')
 		links = table.find_all('a')
