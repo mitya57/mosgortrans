@@ -53,7 +53,12 @@ class MgtOrgBackend(Backend):
 		url = self._build_url(list, route_type, route, day, direction)
 		request = urlopen(url)
 		message = request.read().decode('cp1251')
-		return message.strip().split('\n')
+		result = message.strip().split('\n')
+		if '' in result:
+			result.remove('')
+		if ' -' in result:
+			result.remove(' -')
+		return result
 
 	def get_routes_by_type(self, route_type):
 		return self._load_list_url('ways', route_type)
@@ -62,10 +67,7 @@ class MgtOrgBackend(Backend):
 		return self._load_list_url('days', route_type, route)
 
 	def get_directions(self, route_type, route, day):
-		list = self._load_list_url('directions', route_type, route, day)
-		if ' -' in list:
-			list.remove(' -')
-		return list
+		return self._load_list_url('directions', route_type, route, day)
 
 	def get_waypoints(self, route_type, route, day, direction):
 		# Direction must be 'AB' or 'BA'
