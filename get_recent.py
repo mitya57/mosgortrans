@@ -14,6 +14,7 @@ parser.add_argument('-o', '--output-file', help='file to store schedule creation
 parser.add_argument('-i', '--input-file', help='file to read routes list from')
 parser.add_argument('-d', '--days', type=int, help='number of recent days for which schedules should be checked', default=14)
 parser.add_argument('-D', '--download', help='download the schedules as JSON files', action='store_true')
+parser.add_argument('-p', '--print-info', help='print short info about the schedule', action='store_true')
 parser.add_argument('-O', '--output-dir', help='directory to store downloaded schedules in', default='schedules')
 parser.add_argument('-g', '--debug', help='enable debug output', action='store_true')
 parser.add_argument('--ru', help='only search mosgortrans.ru site', action='store_true')
@@ -76,15 +77,18 @@ def process_org(route_type, route):
 		schedule = backend_org.get_schedule(
 			route_type, route, day, 'AB', None)
 		process_route(route_type, route, day, schedule.created)
-		if args.download:
+		if args.download or args.print_info:
 			if check_timestamp(schedule.created):
 				save_schedule(route_type, route, day, 'AB', schedule)
 			if len(backend_org.get_directions(route_type, route, day)) > 1:
 				schedule = backend_org.get_schedule(route_type,
 					route, day, 'BA', None)
 				if check_timestamp(schedule.created):
-					save_schedule(route_type, route, day,
-					'BA', schedule)
+					if args.download:
+						save_schedule(route_type, route, day,
+						'BA', schedule)
+					if args.print_info:
+						schedule.print_info()
 
 @retrying_wrapper
 def process_ru(route_type, route):
@@ -92,14 +96,17 @@ def process_ru(route_type, route):
 	if args.debug:
 		print('got route_info for', route_type.name, route)
 	for date_info in route_info:
-		if args.download and check_timestamp(date_info[1]):
+		if (args.download or args.print_info) and check_timestamp(date_info[1]):
 			directions = len(backend_ru.get_directions(route_type,
 				route, date_info[0]))
 			for direction in (('AB', 'BA') if directions > 1 else ('AB',)):
 				schedule = backend_ru.get_schedule_from_route_info(
 					route_info, date_info[0], direction, None)
-				save_schedule(route_type, route, date_info[0],
-					direction, schedule)
+				if args.download:
+					save_schedule(route_type, route, date_info[0],
+						direction, schedule)
+				if args.print_info:
+					schedule.print_info()
 		process_route(route_type, route, date_info[0], date_info[1])
 
 times_file = open(args.output_file, 'w')

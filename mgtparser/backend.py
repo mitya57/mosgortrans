@@ -89,6 +89,19 @@ class Schedule():
 	valid = None
 	schedule = None
 
+	def print_info(self):
+		schedule_items = list(self.schedule.items())
+		first_schedule = schedule_items[0][1]
+		last_schedule = schedule_items[-1][1]
+		work_hours = (int(first_schedule[-1].split(':')[0]) -
+		              int(first_schedule[0].split(':')[0])) % 24
+		print('[INFO] %d waypoints, start %s-%s, finish %s-%s, %d routes per day, %d work hours' % (
+			len(self.schedule),
+			first_schedule[0], first_schedule[-1],
+			last_schedule[0], last_schedule[-1],
+			len(first_schedule), work_hours
+		))
+
 	def _get_dumpable_object(self):
 		waypoints = {}
 		for waypoint_name in self.schedule:
