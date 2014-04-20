@@ -45,6 +45,8 @@ if args.input_file:
 result = []
 now = datetime.now().date()
 
+advanced_mode = args.download or args.print_info
+
 def retrying_wrapper(function):
 	@wraps(function)
 	def function_new(*args, **kwargs):
@@ -66,10 +68,17 @@ def process_route(route_type, route, day, created):
 		print(route_type.name, route, day, created)
 
 def save_schedule(route_type, route, day, direction, schedule):
+	if not (args.download and check_timestamp(schedule.created)):
+		return
 	print('saving schedule:', route_type.name, route, day, direction)
 	dir = path.join(args.output_dir, route_type.name, route, day)
 	makedirs(dir, exist_ok=True)
 	schedule.save_to_file(path.join(dir, direction + '.json'))
+
+def print_info(schedule):
+	if not (args.print_info and check_timestamp(schedule.created)):
+		return
+	schedule.print_info()
 
 @retrying_wrapper
 def process_org(route_type, route):
@@ -77,18 +86,17 @@ def process_org(route_type, route):
 		schedule = backend_org.get_schedule(
 			route_type, route, day, 'AB', None)
 		process_route(route_type, route, day, schedule.created)
-		if args.download or args.print_info:
+		if not advanced_mode:
+			continue
+		save_schedule(route_type, route, day, 'AB', schedule)
+		print_info(schedule)
+		if len(backend_org.get_directions(route_type, route, day)) > 1:
+			schedule = backend_org.get_schedule(route_type,
+				route, day, 'BA', None)
 			if check_timestamp(schedule.created):
-				save_schedule(route_type, route, day, 'AB', schedule)
-			if len(backend_org.get_directions(route_type, route, day)) > 1:
-				schedule = backend_org.get_schedule(route_type,
-					route, day, 'BA', None)
-				if check_timestamp(schedule.created):
-					if args.download:
-						save_schedule(route_type, route, day,
-						'BA', schedule)
-					if args.print_info:
-						schedule.print_info()
+				save_schedule(route_type, route, day,
+					'BA', schedule)
+				print_info(schedule)
 
 @retrying_wrapper
 def process_ru(route_type, route):
@@ -96,17 +104,15 @@ def process_ru(route_type, route):
 	if args.debug:
 		print('got route_info for', route_type.name, route)
 	for date_info in route_info:
-		if (args.download or args.print_info) and check_timestamp(date_info[1]):
+		if advanced_mode and check_timestamp(date_info[1]):
 			directions = len(backend_ru.get_directions(route_type,
 				route, date_info[0]))
 			for direction in (('AB', 'BA') if directions > 1 else ('AB',)):
 				schedule = backend_ru.get_schedule_from_route_info(
 					route_info, date_info[0], direction, None)
-				if args.download:
-					save_schedule(route_type, route, date_info[0],
-						direction, schedule)
-				if args.print_info:
-					schedule.print_info()
+				save_schedule(route_type, route, date_info[0],
+					direction, schedule)
+				print_info(schedule)
 		process_route(route_type, route, date_info[0], date_info[1])
 
 times_file = open(args.output_file, 'w')
