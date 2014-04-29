@@ -78,7 +78,9 @@ def save_schedule(route_type, route, day, direction, schedule):
 def print_info(schedule):
 	if not (args.print_info and check_timestamp(schedule.created)):
 		return
-	schedule.print_info()
+	info_string = schedule.get_info_string()
+	print('[INFO]', info_string)
+	print(info_string, file=times_file)
 
 @retrying_wrapper
 def process_org(route_type, route):
