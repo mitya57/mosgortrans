@@ -118,7 +118,7 @@ class MgtRuBackend(Backend):
 				url = date_info[3]
 		waypoints_page = self.get_waypoints_page(url)
 		direction = waypoints_page[direction == 'BA'][1]
-		return [waypoint for waypoint, url in direction]
+		return [waypoint for waypoint, _url in direction]
 
 	def get_schedule_from_route_info(self, route_info, day, direction, waypoint):
 		schedule = Schedule()
