@@ -102,8 +102,8 @@ class MgtOrgBackend(Backend):
 		schedule.created = _parse_date(created_re.search(message).group(1))
 		schedule.valid   = _parse_date(valid_re.search(message).group(1))
 		schedule.schedule = {}
-		for w_match in waypoint_re.finditer(message):
-			waypoint = w_match.group(1)
+		for ind, w_match in enumerate(waypoint_re.finditer(message)):
+			waypoint = '%02d %s' % (ind, w_match.group(1))
 			times = []
 			schedule.schedule[waypoint] = []
 			for h_match in hour_re.finditer(w_match.group(2)):
