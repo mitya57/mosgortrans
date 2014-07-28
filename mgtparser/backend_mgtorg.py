@@ -32,6 +32,7 @@ hour_re = re.compile(
     r'(.+?)'
   r'</td>')
 minute_re = re.compile(r'<span class="minutes" >([^<]+)</span>')
+minute_color_re = re.compile(r'<span class="minutes" style="color: ([a-z]+); font-weight: bold;">([^<]+)</span>')
 
 def _parse_date(date_str):
 	if date_str == '&nbsp;':
@@ -110,6 +111,9 @@ class MgtOrgBackend(Backend):
 				hour = h_match.group(1)
 				for m_match in minute_re.finditer(h_match.group(2)):
 					time = '%s:%s' % (hour, m_match.group(1))
+					times.append(time)
+				for m_match in minute_color_re.finditer(h_match.group(2)):
+					time = '%s:%s%s' % (hour, m_match.group(2), m_match.group(1)[0])
 					times.append(time)
 			schedule.schedule[waypoint] = times
 		return schedule
