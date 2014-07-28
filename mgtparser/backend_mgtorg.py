@@ -4,7 +4,7 @@
 
 from urllib.request import urlopen
 from urllib.parse import urlencode
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, SoupStrainer
 from datetime import date
 
 from .backend import Backend, Schedule
@@ -80,10 +80,10 @@ class MgtOrgBackend(Backend):
 		url = self._build_url(None, route_type, route, day, direction, waypoint)
 		request = urlopen(url)
 		message = request.read().decode('cp1251')
-		soup = BeautifulSoup(message)
-		reqform = soup.find('table', 'reqform')
-		table1 = reqform.td.table
-		table2 = table1.td.table
+		strainer = SoupStrainer('table', 'reqform')
+		soup = BeautifulSoup(message, parse_only=strainer)
+		reqform = soup.table
+		table2 = reqform.table.table
 		tds = table2.find_all('td')
 		schedule.created = _parse_date(tds[2].string)
 		schedule.valid   = _parse_date(tds[3].string)
