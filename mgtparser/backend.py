@@ -109,6 +109,8 @@ class Schedule():
 			waypoints[waypoint_name] = {}
 			for time in self.schedule[waypoint_name]:
 				hour, minute = time.split(':')
+				if len(hour) == 1:
+					hour = '0' + hour
 				if hour in waypoints[waypoint_name]:
 					waypoints[waypoint_name][hour] += (',' + minute)
 				else:
