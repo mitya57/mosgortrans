@@ -2,9 +2,9 @@
 # Author: 2014 Dmitry Shachnev <d-shachnev@yandex.ru>
 # License: BSD
 
+import re
 from urllib.request import urlopen
 from urllib.parse import urlencode
-from bs4 import BeautifulSoup, SoupStrainer
 from datetime import date
 
 from .backend import Backend, Schedule
@@ -15,8 +15,26 @@ schedule_base_url = 'http://mosgortrans.org/pass3/shedule.php?'
 months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
           'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
 
+whitespace_re = re.compile(r'[\t\n]')
+created_re = re.compile(r'<h3>c</h3></td><td><h3>([^<]+)</h3></td>')
+valid_re = re.compile(r'<h3>по</h3></td><td><h3>([^<]+)</h3></td>')
+waypoint_re = re.compile(
+  r'<tr><td><h2>([^<]+)</h2></td></tr>'
+  r'<tr><td align="center" class="bottomwideborder">'
+    r'<table border="0" cellspacing="0" cellpadding="0">'
+    r'(.+?)'
+    r'</table>'
+  r'<br></td></tr>')
+hour_re = re.compile(
+  r'<td align="right" valign="middle" width="45" class="bottomborder" bgcolor="#[ef]+">'
+  r'<span class="hour">([^<]+)</span></td>'
+  r'<td align="left" valign="middle" width="25" bgcolor="#[ef]+" class="bottomborder">'
+    r'(.+?)'
+  r'</td>')
+minute_re = re.compile(r'<span class="minutes" >([^<]+)</span>')
+
 def _parse_date(date_str):
-	if len(date_str) <= 1:
+	if date_str == '&nbsp;':
 		return None
 	day, month, year = date_str.split()
 	month = months.index(month) + 1
@@ -80,26 +98,18 @@ class MgtOrgBackend(Backend):
 		url = self._build_url(None, route_type, route, day, direction, waypoint)
 		request = urlopen(url)
 		message = request.read().decode('cp1251')
-		strainer = SoupStrainer('table', 'reqform')
-		soup = BeautifulSoup(message, parse_only=strainer)
-		reqform = soup.table
-		table2 = reqform.table.table
-		tds = table2.find_all('td')
-		schedule.created = _parse_date(tds[2].string)
-		schedule.valid   = _parse_date(tds[3].string)
-		children = list(reqform.children)
-		subtitles = children[3:-3:2]
-		subtables = children[4:-2:2]
+		message = whitespace_re.sub('', message)
+		schedule.created = _parse_date(created_re.search(message).group(1))
+		schedule.valid   = _parse_date(valid_re.search(message).group(1))
 		schedule.schedule = {}
-		for subtitle, subtable in zip(subtitles, subtables):
-			waypoint = subtitle.h2.string
+		for w_match in waypoint_re.finditer(message):
+			waypoint = w_match.group(1)
+			times = []
 			schedule.schedule[waypoint] = []
-			subtds = subtable.table.find_all('td')
-			subtds = zip(subtds[0::2], subtds[1::2])
-			for pair in subtds:
-				if pair[0].span['class'][0] != 'hour':
-					continue
-				hour = pair[0].span.string
-				schedule.schedule[waypoint] += ['%s:%s' % (hour, span.string)
-					for span in pair[1].find_all('span')]
+			for h_match in hour_re.finditer(w_match.group(2)):
+				hour = h_match.group(1)
+				for m_match in minute_re.finditer(h_match.group(2)):
+					time = '%s:%s' % (hour, m_match.group(1))
+					times.append(time)
+			schedule.schedule[waypoint] = times
 		return schedule
