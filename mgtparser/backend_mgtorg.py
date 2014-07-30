@@ -26,9 +26,9 @@ waypoint_re = re.compile(
     r'</table>'
   r'<br></td></tr>')
 hour_re = re.compile(
-  r'<td align="right" valign="middle" width="45" class="bottomborder" bgcolor="#[ef]+">'
+  r'<td align="right" valign="middle" width="45" class="[a-z]*" bgcolor="#[ef]+">'
   r'<span class="hour">([^<]+)</span></td>'
-  r'<td align="left" valign="middle" width="25" bgcolor="#[ef]+" class="bottomborder">'
+  r'<td align="left" valign="middle" width="25" bgcolor="#[ef]+" class="[a-z]*">'
     r'(.+?)'
   r'</td>')
 minute_re = re.compile(r'<span class="minutes" >([^<]+)</span>')
