@@ -46,6 +46,9 @@ def process_route(route_type, route):
 				route_type, route, day, 'BA', None)
 			process_schedule(schedule)
 
+def is_finish(wp_name):
+	return ('к/ст' in wp_name) or ('(выс.)' in wp_name)
+
 def process_schedule(schedule):
 	print('Created on %s, valid until %s' % (schedule.created, schedule.valid))
 	clr_start = {}
@@ -60,7 +63,7 @@ def process_schedule(schedule):
 			else:
 				colored = [t[:-1] for t in times if t.endswith(color[0])]
 			if colored:
-				if color not in clr_start or 'к/ст' in clr_start[color]:
+				if color not in clr_start or is_finish(clr_start[color]):
 					clr_start[color] = waypoint
 					clr_first[color] = colored[0]
 					clr_last[color] = colored[-1]
