@@ -68,7 +68,7 @@ def process_schedule(schedule):
 					clr_first[color] = colored[0]
 					clr_last[color] = colored[-1]
 				clr_end[color] = waypoint
-	for color, start in clr_start.items():
+	for color, start in sorted(clr_start.items()):
 		print('%s: "%s" to "%s", first %s, last %s' % (
 			color, start, clr_end[color], clr_first[color], clr_last[color]
 		))
