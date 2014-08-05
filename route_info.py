@@ -54,7 +54,7 @@ def process_schedule(schedule):
 	clr_last = {}
 	for waypoint in sorted(schedule.schedule):
 		times = schedule.schedule[waypoint]
-		for color in 'black', 'green', 'red', 'darkblue':
+		for color in 'black', 'green', 'red', 'darkblue', 'pink':
 			if color == 'black':
 				colored = [t for t in times if t[-1].isdigit()]
 			else:
