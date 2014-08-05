@@ -36,7 +36,7 @@ def format_day(day_str):
 
 def process_route(route_type, route):
 	for day in backend_org.get_days(route_type, route):
-		print('=== %s %s %s AB ===' % (route_type, route, format_day(day)))
+		print('=== %s %s %s AB ===' % (route_type.name, route, format_day(day)))
 		schedule = backend_org.get_schedule(
 			route_type, route, day, 'AB', None)
 		process_schedule(schedule)
